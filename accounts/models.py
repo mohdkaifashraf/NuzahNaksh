@@ -10,7 +10,7 @@ class User(AbstractUser):
         return self.first_name
 
     class Meta:
-        db_table: 'User'
+        db_table ='users'
 
 class Country(models.TextChoices):
     India = 'IN', 'India'
@@ -34,4 +34,4 @@ class Address(models.Model):
 
 
     class Meta:
-            db_table: 'Address'
+        db_table = 'addresses'

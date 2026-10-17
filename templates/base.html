@@ -1,0 +1,71 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NuzahNaksh{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block page_styles %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+
+            <a href="/" class="brand" aria-label="NuzahNaksh home">
+                <span class="brand-mark">✿</span>
+                <span class="brand-text">
+                    <span class="brand-name">NuzahNaksh</span>
+                    <span class="brand-tagline">ART • FLOWERS • HANDMADE</span>
+                </span>
+            </a>
+
+            <form class="header-search" method="GET" action="/">
+                <input
+                    type="search"
+                    name="q"
+                    placeholder="Search handmade treasures..."
+                    aria-label="Search products"
+                >
+                <button type="submit" aria-label="Search">⌕</button>
+            </form>
+
+            <div class="header-actions">
+                {% if user.is_authenticated %}
+                    <span class="user-greeting">Hello, {{ user.username }}</span>
+
+                    <form method="POST" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-button">Sign Out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="sign-in-link">Sign In</a>
+                {% endif %}
+
+                <a href="#" class="icon-link">
+                    <span aria-hidden="true">♡</span>
+                    <span class="action-label">Wishlist</span>
+                </a>
+
+                <a href="#" class="icon-link">
+                    <span aria-hidden="true">♧</span>
+                    <span class="action-label">Cart</span>
+                </a>
+            </div>
+
+        </div>
+
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="/">Home</a>
+            <a href="#">Shop</a>
+            <a href="#">Collections</a>
+            <a href="#">Our Story</a>
+        </nav>
+    </header>
+    <main class="page-shell">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

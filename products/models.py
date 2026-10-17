@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import CASCADE
+from decimal import Decimal
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, unique=True, blank=False)
@@ -19,13 +20,21 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    @property
+    def discounted_price(self):
+        discount = Decimal(self.discount_percentage)
+        result = self.price * (Decimal("100") - discount) / Decimal("100")
+        return result.quantize(Decimal("0.01"))
 
+    @property
+    def discount_amount(self):
+        return self.price - self.discounted_price
 
     def __str__(self) -> str:
         return self.product_name
 
 class ProductImage(models.Model):
     Product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=False)
-    image = models.ImageField(upload_to="products/")
+    image = models.ImageField(upload_to='uploads/%y/%m/%d')
     is_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)

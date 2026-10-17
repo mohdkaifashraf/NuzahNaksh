@@ -1,0 +1,117 @@
+
+
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="home-section">
+    <p class="hero-eyebrow">Explore our collection</p>
+    <h2 class="section-title">Shop by Category</h2>
+
+    {% for category in categories %}
+        <section class="category-container">
+            <h2 class="category-heading">
+                {{ category.category_name }}
+            </h2>
+
+            <div class="product-grid">
+                {% for product in category.product_set.all %}
+                    {% if product.stock > 0 %}
+                        <article class="product-card">
+
+                            <a class="product-card-link"
+                            href="{% url 'product_details' product.pk %}">
+
+                                <div class="product-image-wrapper">
+                                    {% with product_image=product.productimage_set.first %}
+                                        {% if product_image %}
+                                            <img
+                                                src="{{ product_image.image.url }}"
+                                                alt="{{ product.product_name }}"
+                                                class="product-image"
+                                            >
+                                        {% else %}
+                                            <div class="product-image-placeholder">
+                                                Image coming soon
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="discount-badge">
+                                            {{ product.discount_percentage }}% OFF
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-card-body">
+                                    <h3>{{ product.product_name }}</h3>
+
+                                    <p class="product-description">
+                                        {{ product.product_description|truncatewords:15 }}
+                                    </p>
+                                    
+                                    <div class="product-pricing">
+                                        {% if product.discount_percentage > 0 %}
+                                            <span class="original-price">
+                                                ₹{{ product.price }}
+                                            </span>
+                                        {% endif %}
+
+                                        <span class="selling-price">
+                                            ₹{{ product.discounted_price }}
+                                        </span>
+
+                                        {% if product.discount_percentage > 0 %}
+                                            <span class="savings">
+                                                Save ₹{{ product.discount_amount }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+
+                            {% comment %} <form method="post"
+                                action="#"
+                                class="add-to-cart-form">
+                                {% csrf_token %}
+
+                                <label for="quantity-{{ product.pk }}">
+                                    Quantity
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="quantity-{{ product.pk }}"
+                                    name="quantity"
+                                    value="1"
+                                    min="1"
+                                    max="{{ product.stock }}"
+                                    required
+                                >
+
+                                <button type="submit" class="add-to-cart-button">
+                                    Add to Cart
+                                </button>
+                            </form> {% endcomment %}
+
+                        </article>
+                    {% endif %}
+                {% empty %}
+                    <p>No products are available in this category yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+{% endfor %}
+
+    {% comment %} {% empty %}
+        <p>No categories available yet.</p>
+    {% endfor %} {% endcomment %}
+</section>
+
+{% endblock  %}

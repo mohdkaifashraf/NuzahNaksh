@@ -1,0 +1,242 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ product.product_name }} | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="product-detail-page">
+
+    <!-- Breadcrumb -->
+    {% comment %} <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>/</span>
+        <span>{{ product.category.category_name }}</span>
+        <span>/</span>
+        <span>{{ product.product_name }}</span>
+    </nav> {% endcomment %}
+
+    <!-- Main product section -->
+    <section class="product-main">
+
+        <!-- Product images -->
+        <div class="product-gallery">
+            {% for product_image in product.productimage_set.all %}
+                <div class="gallery-image">
+                    <img
+                        src="{{ product_image.image.url }}"
+                        alt="{{ product.product_name }}"
+                    >
+                    {% if product_image.is_primary %}
+                        <span class="primary-image-label">Featured</span>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="no-product-image">
+                    <p>Product image coming soon</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Product information -->
+        <div class="product-information">
+
+            <p class="product-category">
+                {{ product.category.category_name }}
+            </p>
+
+            <h1>{{ product.product_name }}</h1>
+
+            <div class="rating-summary">
+                <span class="rating-star">★</span>
+                <span>
+                    {{ average_rating|default:"New" }}
+                    {% if review_count %}
+                        ({{ review_count }} reviews)
+                    {% else %}
+                        — No reviews yet
+                    {% endif %}
+                </span>
+            </div>
+
+            <!-- Pricing -->
+            <div class="detail-pricing">
+
+                <span class="detail-selling-price">
+                    ₹{{ product.discounted_price|floatformat:2 }}
+                </span>
+
+                {% if product.discount_percentage > 0 %}
+                    <span class="detail-original-price">
+                        ₹{{ product.price|floatformat:2 }}
+                    </span>
+
+                    <span class="detail-discount-badge">
+                        {{ product.discount_percentage }}% OFF
+                    </span>
+
+                    <p class="detail-savings">
+                        You save ₹{{ product.discount_amount|floatformat:2 }}
+                    </p>
+                {% endif %}
+
+            </div>
+
+            <div class="short-product-description">
+                {{ product.product_description|truncatewords:30 }}
+            </div>
+
+            <div class="stock-status">
+                {% if product.stock > 0 %}
+                    <span class="in-stock-dot"></span>
+                    <span>{{ product.stock }} available in stock</span>
+                {% else %}
+                    <span class="out-of-stock">Currently out of stock</span>
+                {% endif %}
+            </div>
+
+            <!-- Add to cart -->
+            {% if product.stock > 0 %}
+                <form
+                    method="post"
+                    action="#"
+                    class="detail-cart-form"
+                >
+                    {% csrf_token %}
+
+                    <label for="quantity">Quantity</label>
+
+                    <div class="quantity-control">
+                        <button
+                            type="submit"
+                            name="quantity_action"
+                            value="decrease"
+                            formnovalidate
+                            aria-label="Decrease quantity"
+                        >−</button>
+
+                        <input
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            value="1"
+                            min="1"
+                            max="{{ product.stock }}"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                            name="quantity_action"
+                            value="increase"
+                            formnovalidate
+                            aria-label="Increase quantity"
+                        >+</button>
+                    </div>
+
+                    <button type="submit" class="add-cart-button">
+                        Add to Cart
+                    </button>
+                </form>
+            {% endif %}
+
+            <p class="delivery-note">
+                ♡ Thoughtfully selected for your special moments
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- Full description and specifications -->
+    <section class="detail-section">
+        <h2>Product Description</h2>
+        <div class="full-description">
+            {{ product.product_description|linebreaks }}
+        </div>
+
+        <h3>Product Information</h3>
+        <div class="specification-list">
+            <div class="specification-row">
+                <span>Category</span>
+                <span>{{ product.category.category_name }}</span>
+            </div>
+            <div class="specification-row">
+                <span>Availability</span>
+                <span>
+                    {% if product.stock > 0 %}
+                        In stock
+                    {% else %}
+                        Out of stock
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer reviews -->
+    <section class="detail-section reviews-section">
+        <h2>Customer Reviews</h2>
+
+        {% if reviews %}
+            {% for review in reviews %}
+                <article class="review-card">
+                    <div class="review-heading">
+                        <h3>{{ review.user.username }}</h3>
+                        <span class="review-rating">
+                            ★ {{ review.rating }}/5
+                        </span>
+                    </div>
+
+                    <p>{{ review.comment|linebreaksbr }}</p>
+
+                    <time>
+                        {{ review.created_at|date:"d M Y" }}
+                    </time>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p class="empty-reviews">
+                No reviews yet. Be the first to share your experience!
+            </p>
+        {% endif %}
+    </section>
+
+    <!-- Related products -->
+    {% if related_products %}
+        <section class="detail-section related-section">
+            <h2>You May Also Like</h2>
+
+            <div class="related-products-grid">
+                {% for related in related_products %}
+                    <article class="related-product-card">
+                        <a href="{% url 'product_detail' related.pk %}">
+                            {% with related_image=related.productimage_set.first %}
+                                {% if related_image %}
+                                    <img
+                                        src="{{ related_image.image.url }}"
+                                        alt="{{ related.product_name }}"
+                                    >
+                                {% endif %}
+                            {% endwith %}
+
+                            <h3>{{ related.product_name }}</h3>
+                        </a>
+
+                        <p class="related-price">
+                            ₹{{ related.discounted_price|floatformat:2 }}
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+</div>
+
+{% endblock %}
