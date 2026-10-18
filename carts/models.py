@@ -20,6 +20,14 @@ class CartItem(models.Model):
     created_at =models.DateField(auto_now=True)
     updated_at =models.DateField(auto_now=True)
 
+    @property
+    def line_total(self):
+        return self.product.discounted_price * self.quantity
+
+    @property
+    def total(self):
+        return self.line_total
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

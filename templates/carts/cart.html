@@ -1,0 +1,250 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Shopping Cart | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="cart-page">
+
+    <div class="cart-heading">
+        <p class="eyebrow">YOUR LITTLE TREASURES</p>
+        <h1>My Shopping Cart</h1>
+        <p>Review your handcrafted favourites before checkout.</p>
+    </div>
+
+    {% if messages %}
+        <div class="cart-messages">
+            {% for message in messages %}
+                <div class="cart-message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if cart_items %}
+
+    <div class="cart-layout">
+
+        <!-- LEFT: CART ITEMS -->
+        <div class="cart-items-section">
+
+            <div class="cart-section-heading">
+                <h2>Your Items</h2>
+                <span>{{ cart_items|length }} item{{ cart_items|length|pluralize }}</span>
+            </div>
+
+            {% for item in cart_items %}
+            <article class="cart-item">
+
+                <!-- Product image -->
+                <a class="cart-item-image"
+                   href="{% url 'product_detail' item.product.pk %}">
+
+                    {% with images=item.product.productimage_set.all %}
+                        {% for product_image in images %}
+                            {% if product_image%}
+                                <img src="{{ product_image.image.url }}"
+                                     alt="{{ item.product.name }}">
+                            {% endif %}
+                        {% empty %}
+                            <div class="image-placeholder">
+                                Image unavailable
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+
+                </a>
+
+                <!-- Product details -->
+                <div class="cart-item-details">
+
+                    <p class="item-category">
+                        {{ item.product.category }}
+                    </p>
+
+                    <h3>
+                        <a href="{% url 'product_detail' item.product.pk %}">
+                            {{ item.product.product_name }}
+                        </a>
+                    </h3>
+
+                    <p class="item-stock">
+                        {% if item.product.stock > 0 %}
+                            <span class="stock-dot"></span>
+                            In stock
+                        {% else %}
+                            Currently unavailable
+                        {% endif %}
+                    </p>
+
+                    <div class="item-prices">
+                        {% if item.product.discount_percentage > 0 %}
+                            <span class="old-price">
+                                ₹{{ item.product.price|floatformat:2 }}
+                            </span>
+                        {% endif %}
+
+                        <span class="current-price">
+                            ₹{{ item.product.discounted_price|floatformat:2 }}
+                        </span>
+                    </div>
+
+                    <!-- Quantity update form -->
+                    <form method="post"
+                          action="{% url 'cart_update' item.id %}"
+                          class="quantity-form">
+
+                        {% csrf_token %}
+
+                        <label for="quantity-{{ item.pk }}">
+                            Quantity
+                        </label>
+
+                        <div class="quantity-controls">
+                            <input
+                                type="number"
+                                id="quantity-{{ item.pk }}"
+                                name="quantity"
+                                value="{{ item.quantity }}"
+                                min="1"
+                                max="{{ item.product.stock }}"
+                                required
+                            >
+
+                            <button type="submit" class="update-button">
+                                Update
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Remove item form -->
+                    <form method="post"
+                          action="{% url 'cart_remove' item.id %}"
+                          class="remove-form">
+
+                        {% csrf_token %}
+
+                        <button type="submit" class="remove-button">
+                            Remove item
+                        </button>
+                    </form>
+
+                </div>
+
+                <!-- Line total -->
+                <div class="cart-item-total">
+                    <span class="line-total-label">Item total</span>
+                    <strong>
+                        ₹{{ item.line_total|floatformat:2 }}
+                    </strong>
+                </div>
+
+            </article>
+            {% endfor %}
+
+            <a href="{% url 'home' %}" class="continue-shopping">
+                ← Continue shopping
+            </a>
+
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <aside class="order-summary">
+
+            <h2>Order Summary</h2>
+
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+
+            <div class="summary-row">
+                <span>Delivery charge</span>
+
+                {% if delivery_charge == 0 %}
+                    <span class="free-delivery">FREE</span>
+                {% else %}
+                    <span>₹{{ delivery_charge|floatformat:2 }}</span>
+                {% endif %}
+            </div>
+
+            {% if discount_amount %}
+            <div class="summary-row savings-row">
+                <span>You save</span>
+                <span>-₹{{ discount_amount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+
+            <div class="delivery-note">
+                <span class="delivery-icon">✿</span>
+                <p>
+                    Your handcrafted treasures are getting ready
+                    for their journey to you.
+                </p>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row total-row">
+                <span>Total payable</span>
+                <strong>₹{{ total_amount|floatformat:2 }}</strong>
+            </div>
+
+            <p class="tax-note">
+                Final delivery availability and charges are confirmed
+                during checkout.
+            </p>
+
+            <a href="#" class="checkout-button">
+                Proceed to Checkout
+                <span>→</span>
+            </a>
+
+            <div class="secure-checkout">
+                <span>🔒</span>
+                <span>Secure checkout</span>
+            </div>
+
+            <div class="payment-note">
+                <strong>Before you place your order</strong>
+                <p>
+                    Review your quantities and delivery details.
+                    Final prices and stock will be verified at checkout.
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY CART -->
+    <div class="empty-cart">
+
+        <div class="empty-cart-icon">♡</div>
+
+        <h2>Your cart is waiting for something lovely</h2>
+
+        <p>
+            You haven't added anything to your cart yet.
+            Explore our handmade collection and find something special.
+        </p>
+
+        <a href="{% url 'home' %}" class="checkout-button empty-cart-button">
+            Explore Collection
+            <span>→</span>
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+{% endblock %}

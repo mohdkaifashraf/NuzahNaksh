@@ -102,21 +102,16 @@
 
             <!-- Add to cart -->
             {% if product.stock > 0 %}
-                <form
-                    method="post"
-                    action="#"
-                    class="detail-cart-form"
-                >
+                <form method="post" action="{% url 'add_item_cart' product.id %}" class="detail-cart-form">
                     {% csrf_token %}
 
                     <label for="quantity">Quantity</label>
 
                     <div class="quantity-control">
+                        <!-- Changed type to "button" -->
                         <button
-                            type="submit"
-                            name="quantity_action"
-                            value="decrease"
-                            formnovalidate
+                            type="button" 
+                            id="decrease-qty"
                             aria-label="Decrease quantity"
                         >−</button>
 
@@ -130,15 +125,15 @@
                             required
                         >
 
+                        <!-- Changed type to "button" -->
                         <button
-                            type="submit"
-                            name="quantity_action"
-                            value="increase"
-                            formnovalidate
+                            type="button"
+                            id="increase-qty"
                             aria-label="Increase quantity"
                         >+</button>
                     </div>
 
+                    <!-- This is the ONLY button that submits the form -->
                     <button type="submit" class="add-cart-button">
                         Add to Cart
                     </button>
@@ -238,5 +233,6 @@
     {% endif %}
 
 </div>
+<script src="{% static 'js/cart.js' %}"></script>
 
 {% endblock %}
