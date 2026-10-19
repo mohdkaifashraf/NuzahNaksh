@@ -1,0 +1,246 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="checkout-page">
+
+    <header class="checkout-header">
+        <p class="checkout-eyebrow">NUZAHNAKSH · ALMOST YOURS</p>
+        <h1>Let's make it yours</h1>
+        <p>Confirm your delivery details and review your handmade treasures.</p>
+
+        <div class="checkout-steps">
+            <span class="step completed">1. Cart</span>
+            <span class="step active">2. Delivery</span>
+            <span class="step">3. Payment</span>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="checkout-messages">
+            {% for message in messages %}
+                <p class="checkout-message {{ message.tags }}">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="checkout-layout">
+
+        <!-- DELIVERY ADDRESS -->
+        <section class="checkout-main">
+
+            <div class="checkout-card">
+                <div class="section-heading">
+                    <div class="section-icon">01</div>
+                    <div>
+                        <h2>Delivery address</h2>
+                        <p>Where should we send your order?</p>
+                    </div>
+                </div>
+
+                {% if addresses %}
+                <form method="post" action="{% url 'checkout' %}">
+                    {% csrf_token %}
+
+                    <div class="saved-addresses">
+
+                        {% for address in addresses %}
+                        <label class="address-option">
+                            <input
+                                type="radio"
+                                name="address_id"
+                                value="{{ address.pk }}"
+                                {% if selected_address_id == address.pk|stringformat:"s" %}
+                                    checked
+                                {% elif not selected_address_id and forloop.first %}
+                                    checked
+                                {% endif %}
+                                required
+                            >
+
+                            <span class="address-radio"></span>
+
+                            <span class="address-content">
+                                <span class="address-title">
+                                    {{ address.full_name }}
+
+                                    <span class="address-type">
+                                        {{ address.get_address_type_display }}
+                                    </span>
+                                </span>
+
+                                <span class="address-phone">
+                                    {{ address.phone_number }}
+                                </span>
+
+                                <span class="address-lines">
+                                    {{ address.address_line_1 }}
+                                    {% if address.address_line_2 %}
+                                        , {{ address.address_line_2 }}
+                                    {% endif %}
+                                    <br>
+                                    {{ address.city }}, {{ address.state }}
+                                    {{ address.postal_code }}
+                                    <br>
+                                    {{ address.get_country_display }}
+                                </span>
+                            </span>
+
+                            <a class="edit-address-link"
+                               href="{% url 'edit_address' address.id %}">
+                                Edit
+                            </a>
+                        </label>
+                        {% endfor %}
+
+                    </div>
+
+                    <a href="{% url 'address_create' %}"
+                       class="add-address-link">
+                        <span>+</span> Add a new address
+                    </a>
+
+                    <div class="delivery-assurance">
+                        <span class="assurance-flower">✿</span>
+                        <p>
+                            We'll carefully pack your order and deliver
+                            it to the address you choose.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="checkout-submit">
+                        Continue to Payment <span>→</span>
+                    </button>
+
+                    <a href="{% url 'cart' %}"
+                       class="back-to-cart">
+                        ← Return to cart
+                    </a>
+
+                </form>
+
+                {% else %}
+                <div class="no-address">
+                    <div class="no-address-icon">⌂</div>
+                    <h3>No delivery address yet</h3>
+                    <p>Add an address so we know where to deliver your order.</p>
+
+                    <a href="{% url 'address_create' %}"
+                       class="checkout-submit add-first-address">
+                        + Add Delivery Address
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="checkout-note">
+                <span>♡</span>
+                <p>
+                    Every NuzahNaksh order is prepared with care.
+                    Please double-check your phone number and PIN code.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- ORDER SUMMARY -->
+        <aside class="checkout-summary">
+
+            <div class="summary-heading">
+                <h2>Your order</h2>
+                <span>{{ cart_items|length }} item{{ cart_items|length|pluralize }}</span>
+            </div>
+
+            <div class="summary-products">
+                {% for item in cart_items %}
+                <div class="summary-product">
+
+                    <div class="summary-product-image">
+                        {% with images=item.product.productimage_set.all %}
+                            {% for product_image in images %}
+                                {% if product_image %}
+                                    <img src="{{ product_image.image.url }}"
+                                         alt="{{ item.product.product_name }}">
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+
+                        <span class="product-quantity">
+                            {{ item.quantity }}
+                        </span>
+                    </div>
+
+                    <div class="summary-product-details">
+                        <h3>{{ item.product.product_name }}</h3>
+                        <p>{{ item.product.category }}</p>
+                        <span>
+                            ₹{{ item.product.discounted_price|floatformat:2 }}
+                            each
+                        </span>
+                    </div>
+
+                    <strong class="summary-line-total">
+                        ₹{{ item.line_total|floatformat:2 }}
+                    </strong>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="summary-calculations">
+
+                <div class="calculation-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+
+                {% if discount_amount %}
+                <div class="calculation-row savings">
+                    <span>Your savings</span>
+                    <span>-₹{{ discount_amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+
+                <div class="calculation-row">
+                    <span>Delivery</span>
+                    {% if delivery_charge == 0 %}
+                        <span class="free-delivery">FREE</span>
+                    {% else %}
+                        <span>₹{{ delivery_charge|floatformat:2 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="calculation-divider"></div>
+
+                <div class="calculation-row payable">
+                    <span>Total payable</span>
+                    <strong>₹{{ total_amount|floatformat:2 }}</strong>
+                </div>
+
+                <p class="price-disclaimer">
+                    Final payable amount is calculated by the server.
+                    Delivery charges and stock will be verified before
+                    the order is placed.
+                </p>
+
+            </div>
+
+            <div class="summary-footer">
+                <span>♡</span>
+                Thoughtfully made. Lovingly packed.
+            </div>
+
+        </aside>
+
+    </div>
+</main>
+{% endblock %}

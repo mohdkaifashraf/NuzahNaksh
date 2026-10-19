@@ -13,6 +13,14 @@
     <p class="hero-eyebrow">Explore our collection</p>
     <h2 class="section-title">Shop by Category</h2>
 
+    {% if messages %}
+        <div class="wishlist-messages" role="status">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {% for category in categories %}
         <section class="category-container">
             <h2 class="category-heading">
@@ -25,7 +33,7 @@
                         <article class="product-card">
 
                             <a class="product-card-link"
-                            href="{% url 'product_detail' product.pk %}">
+                            href="{% url 'product_details' product.pk %}">
 
                                 <div class="product-image-wrapper">
                                     {% with product_image=product.productimage_set.first %}
@@ -75,6 +83,30 @@
                                     </div>
                                 </div>
                             </a>
+
+                            {% if user.is_authenticated %}
+                                <form method="post"
+                                      action="{% url 'toggle_wishlist' product.pk %}"
+                                      class="wishlist-toggle-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    {% if product.pk in wishlisted_product_ids %}
+                                        <button type="submit"
+                                                class="wishlist-heart is-wishlisted"
+                                                aria-label="Remove {{ product.product_name }} from wishlist"
+                                                aria-pressed="true">♥</button>
+                                    {% else %}
+                                        <button type="submit"
+                                                class="wishlist-heart"
+                                                aria-label="Add {{ product.product_name }} to wishlist"
+                                                aria-pressed="false">♡</button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <a class="wishlist-heart"
+                                   href="{% url 'login' %}?next={% url 'home' %}"
+                                   aria-label="Sign in to add {{ product.product_name }} to wishlist">♡</a>
+                            {% endif %}
 
                             {% comment %} <form method="post"
                                 action="#"

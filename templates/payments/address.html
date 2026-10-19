@@ -1,0 +1,148 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delivery Address | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="address-page">
+
+    <header class="checkout-header address-page-header">
+        <p class="checkout-eyebrow">NUZAHNAKSH · DELIVERY DETAILS</p>
+        <h1>{% if form.instance.pk %}Edit your address{% else %}Add a new address{% endif %}</h1>
+        <p>Share your delivery details so your order finds its way to you.</p>
+    </header>
+
+    {% if messages %}
+        <div class="checkout-messages">
+            {% for message in messages %}
+                <p class="checkout-message {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="checkout-card address-form-card">
+
+        <div class="section-heading">
+            <div class="section-icon">01</div>
+            <div>
+                <h2>Where should we deliver?</h2>
+                <p>Fields marked with * are required.</p>
+            </div>
+        </div>
+
+        <form method="post" class="address-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="address-fields">
+
+                <div class="form-field full-width">
+                    <label for="{{ form.full_name.id_for_label }}">
+                        Full name *
+                    </label>
+                    {{ form.full_name }}
+                    {{ form.full_name.errors }}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.phone_number.id_for_label }}">
+                        Phone number *
+                    </label>
+                    {{ form.phone_number }}
+                    {{ form.phone_number.errors }}
+                    <small>Enter your 10-digit Indian mobile number.</small>
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.address_type.id_for_label }}">
+                        Address type *
+                    </label>
+                    {{ form.address_type }}
+                    {{ form.address_type.errors }}
+                    <small>For example, Home, Work or Other.</small>
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="{{ form.other_address_type.id_for_label }}">
+                        Specify address type, if Other
+                    </label>
+                    {{ form.other_address_type }}
+                    {{ form.other_address_type.errors }}
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="{{ form.address_line_1.id_for_label }}">
+                        House / Flat / Building
+                    </label>
+                    {{ form.address_line_1 }}
+                    {{ form.address_line_1.errors }}
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="{{ form.address_line_2.id_for_label }}">
+                        Street / Locality *
+                    </label>
+                    {{ form.address_line_2 }}
+                    {{ form.address_line_2.errors }}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.city.id_for_label }}">City *</label>
+                    {{ form.city }}
+                    {{ form.city.errors }}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.state.id_for_label }}">State *</label>
+                    {{ form.state }}
+                    {{ form.state.errors }}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.postal_code.id_for_label }}">
+                        PIN code *
+                    </label>
+                    {{ form.postal_code }}
+                    {{ form.postal_code.errors }}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.country.id_for_label }}">
+                        Country *
+                    </label>
+                    {{ form.country }}
+                    {{ form.country.errors }}
+                </div>
+
+            </div>
+
+            <div class="address-form-actions">
+                <a href="{% url 'checkout' %}" class="cancel-address">
+                    Cancel
+                </a>
+
+                <button type="submit" class="checkout-submit">
+                    Save Address <span>→</span>
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+    <p class="address-privacy">
+        Your address details are used to fulfil your order.
+    </p>
+
+</main>
+{% endblock %}

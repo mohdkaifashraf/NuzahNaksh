@@ -44,7 +44,7 @@
                     <a href="{% url 'login' %}" class="sign-in-link">Sign In</a>
                 {% endif %}
 
-                <a href="#" class="icon-link">
+                <a href="{% if user.is_authenticated %}{% url 'wishlist' %}{% else %}{% url 'login' %}?next={% url 'wishlist' %}{% endif %}" class="icon-link">
                     <span aria-hidden="true">♡</span>
                     <span class="action-label">Wishlist</span>
                 </a>

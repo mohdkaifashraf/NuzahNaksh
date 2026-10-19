@@ -15,7 +15,7 @@ def add_item_cart(request, product_id):
 
     if quantity < 1 or quantity > product.stock:
         messages.error(request, "Invalid quantity or insufficient stock.")
-        return redirect("product_detail", pk=product.pk)
+        return redirect("product_details", pk=product.pk)
 
     cart, created = Cart.objects.get_or_create(user = request.user)
 
@@ -30,7 +30,7 @@ def add_item_cart(request, product_id):
 
         if new_quantity > product.stock:
             messages.error(request, "Not enough stock available.")
-            return redirect("product_detail", pk=product.pk)
+            return redirect("product_details", pk=product.pk)
 
         item.quantity = new_quantity
         item.save(update_fields=["quantity"])

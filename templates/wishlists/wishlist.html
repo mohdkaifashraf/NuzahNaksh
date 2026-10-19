@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Wishlist | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="home-section wishlist-page">
+    <p class="hero-eyebrow">YOUR SAVED TREASURES</p>
+    <h1 class="section-title">My Wishlist</h1>
+
+    {% if messages %}
+        <div class="wishlist-messages" role="status">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if wishlist_items %}
+        <div class="product-grid">
+            {% for item in wishlist_items %}
+                <article class="product-card">
+                    <a class="product-card-link"
+                       href="{% url 'product_details' item.product.pk %}">
+                        <div class="product-image-wrapper">
+                            {% with product_image=item.product.productimage_set.first %}
+                                {% if product_image %}
+                                    <img src="{{ product_image.image.url }}"
+                                         alt="{{ item.product.product_name }}"
+                                         class="product-image">
+                                {% else %}
+                                    <div class="product-image-placeholder">
+                                        Image coming soon
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="product-card-body">
+                            <h3>{{ item.product.product_name }}</h3>
+                            <div class="product-pricing">
+                                {% if item.product.discount_percentage > 0 %}
+                                    <span class="original-price">
+                                        ₹{{ item.product.price|floatformat:2 }}
+                                    </span>
+                                {% endif %}
+                                <span class="selling-price">
+                                    ₹{{ item.product.discounted_price|floatformat:2 }}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                    <form method="post"
+                          action="{% url 'toggle_wishlist' item.product.pk %}"
+                          class="wishlist-toggle-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit"
+                                class="wishlist-heart is-wishlisted"
+                                aria-label="Remove {{ item.product.product_name }} from wishlist"
+                                aria-pressed="true">♥</button>
+                    </form>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="wishlist-empty">You haven't saved any products yet.</p>
+        <a href="{% url 'home' %}" class="wishlist-browse-link">Explore the collection</a>
+    {% endif %}
+</section>
+{% endblock %}
