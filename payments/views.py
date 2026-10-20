@@ -233,3 +233,139 @@ def payment_initiate(request, order_id):
     }
 
     return render(request, "payments/payment.html", context)
+
+
+
+
+@login_required
+def verify_payment(request):
+    if request.method != "POST":
+        return redirect("checkout")
+
+    order_id = request.POST.get("order_id")
+    payment_record_id = request.POST.get("payment_record_id")
+    razorpay_payment_id = request.POST.get("razorpay_payment_id")
+    razorpay_order_id = request.POST.get("razorpay_order_id")
+    razorpay_signature = request.POST.get("razorpay_signature")
+
+    # Make sure all required values were submitted.
+    if not all([
+        order_id,
+        payment_record_id,
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature,
+    ]):
+        messages.error(request, "Payment verification details are missing.")
+        return redirect("checkout")
+
+    # Only access orders belonging to the logged-in customer.
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+        user=request.user,
+    )
+
+    payment = get_object_or_404(
+        Payment,
+        pk=payment_record_id,
+        order=order,
+    )
+
+    # Handle repeated submissions safely.
+    if payment.status == Payment.PaymentStatus.SUCCESS:
+        return render(
+            request,
+            "payments/payment_result.html",
+            {"order": order, "success": True},
+        )
+
+    # Check that the submitted Razorpay order matches our database.
+    if payment.gateway_order_id != razorpay_order_id:
+        messages.error(request, "The payment order does not match.")
+        return redirect("checkout")
+
+    client = razorpay.Client(
+        auth=(
+            settings.RAZORPAY_KEY_ID,
+            settings.RAZORPAY_KEY_SECRET,
+        )
+    )
+
+    try:
+        # Verify the signature using the server-side secret.
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_payment_id": razorpay_payment_id,
+            "razorpay_signature": razorpay_signature,
+        })
+
+        # Retrieve payment details directly from Razorpay.
+        gateway_payment = client.payment.fetch(razorpay_payment_id)
+
+        expected_amount = int(order.total_amount * Decimal("100"))
+
+        # Validate the gateway payment against our order.
+        if (
+            gateway_payment.get("order_id") != payment.gateway_order_id
+            or gateway_payment.get("amount") != expected_amount
+            or gateway_payment.get("currency") != "INR"
+        ):
+            messages.error(request, "Payment details could not be verified.")
+            return redirect("checkout")
+
+        # Signature verification is not, by itself, proof that funds
+        # have been captured. Only finalize when Razorpay says captured.
+        if gateway_payment.get("status") != "captured":
+            messages.warning(
+                request,
+                "Your payment has not been captured yet. Please check its status.",
+            )
+            return redirect("checkout")
+
+    except razorpay.errors.SignatureVerificationError:
+        messages.error(request, "Payment signature verification failed.")
+        return redirect("checkout")
+
+    except Exception:
+        messages.error(
+            request,
+            "We couldn't verify your payment right now. Please try again.",
+        )
+        return redirect("checkout")
+
+    # Update records together so a partial database update isn't committed.
+    with transaction.atomic():
+        order = Order.objects.select_for_update().get(
+            pk=order.pk,
+            user=request.user,
+        )
+        payment = Payment.objects.select_for_update().get(
+            pk=payment.pk,
+            order=order,
+        )
+
+        # Recheck after acquiring locks to handle duplicate submissions.
+        if payment.status != Payment.PaymentStatus.SUCCESS:
+            payment.transaction_id = razorpay_payment_id
+            payment.status = Payment.PaymentStatus.SUCCESS
+            payment.save(update_fields=[
+                "transaction_id",
+                "status",
+                "updated_at",
+            ])
+
+            order.status = Order.StatusChoice.CONFIRMED
+            order.save(update_fields=["status", "updated_at"])
+
+            # Clear the cart only after verified payment.
+
+            cart = Cart.objects.filter(user=request.user).first()
+            if cart:
+                CartItem.objects.filter(cart=cart).delete()
+
+    return render(
+        request,
+        "payments/payment_result.html",
+        {"order": order, "success": True},
+    )

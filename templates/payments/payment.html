@@ -55,6 +55,21 @@
         <span>Pay ₹{{ order.total_amount|floatformat:2 }}</span>
         <span class="pay-arrow">→</span>
     </button>
+    <form
+        id="verification-form"
+        method="POST"
+        action="{% url 'verify_payment' %}"
+        hidden
+    >
+        {% csrf_token %}
+
+        <input type="hidden" name="order_id" value="{{ order.id }}">
+        <input type="hidden" name="payment_record_id" value="{{ payment.id }}">
+
+        <input type="hidden" name="razorpay_payment_id">
+        <input type="hidden" name="razorpay_order_id">
+        <input type="hidden" name="razorpay_signature">
+    </form>
 
     <p class="security-note">
         <span class="security-icon">♧</span>

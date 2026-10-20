@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Result | NuzahNaksh</title>
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}">
+</head>
+<body>
+    <main class="payment-container">
+        {% if success %}
+            <div class="brand-mark">✓</div>
+            <section class="payment-heading">
+                <h1>Payment successful!</h1>
+                <p>Your payment has been verified and your order is confirmed.</p>
+            </section>
+
+            <section class="order-details">
+                <div class="detail-row">
+                    <span class="detail-label">Order number</span>
+                    <span class="detail-value">#{{ order.id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount paid</span>
+                    <span class="detail-value">
+                        ₹{{ order.total_amount|floatformat:2 }}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Order status</span>
+                    <span class="detail-value">{{ order.get_status_display }}</span>
+                </div>
+            </section>
+
+            <a href="{% url 'home' %}" class="pay-button"
+               style="text-decoration:none">
+                Continue shopping →
+            </a>
+        {% endif %}
+    </main>
+</body>
+</html>
