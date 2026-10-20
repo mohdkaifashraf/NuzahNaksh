@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="payment-container">
+    <section class="payment-heading">
+        <h1>Complete your payment</h1>
+        <p>
+            Your beautiful finds are almost yours.
+            Complete your payment securely to continue.
+        </p>
+    </section>
+
+    <section class="amount-card">
+        <p class="amount-label">Total amount payable</p>
+        <p class="amount-value">₹{{ order.total_amount|floatformat:2 }}</p>
+        <p class="amount-caption">Inclusive of the charges shown at checkout</p>
+    </section>
+
+    <section class="order-details">
+        <h2>Order summary</h2>
+
+        <div class="detail-row">
+            <span class="detail-label">Order number</span>
+            <span class="detail-value order-number">#{{ order.id }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Order status</span>
+            <span class="detail-value">Awaiting payment</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Payment provider</span>
+            <span class="detail-value">Razorpay</span>
+        </div>
+    </section>
+
+    <button
+        type="button"
+        id="pay-button"
+        class="pay-button"
+        data-key-id="{{ razorpay_key_id }}"
+        data-amount="{{ amount_paise }}"
+        data-order-id="{{ razorpay_order_id }}"
+        data-order-number="{{ order.id }}"
+    >
+        <span>Pay ₹{{ order.total_amount|floatformat:2 }}</span>
+        <span class="pay-arrow">→</span>
+    </button>
+
+    <p class="security-note">
+        <span class="security-icon">♧</span>
+        <span>Your payment is processed securely through Razorpay.
+        Your order will be confirmed after payment verification.</span>
+    </p>
+
+    <footer class="payment-footer">
+        <p>Thank you for choosing NuzahNaksh ♡</p>
+        <p>Please don't refresh the page while payment is in progress.</p>
+    </footer>
+
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="{% static 'Js/payment.js' %}"></script>
+{% endblock %}

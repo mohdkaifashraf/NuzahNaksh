@@ -167,7 +167,7 @@
                     <div class="summary-product-image">
                         {% with images=item.product.productimage_set.all %}
                             {% for product_image in images %}
-                                {% if product_image %}
+                                {% if product_image.is_primary %}
                                     <img src="{{ product_image.image.url }}"
                                          alt="{{ item.product.product_name }}">
                                 {% endif %}
