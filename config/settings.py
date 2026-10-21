@@ -11,6 +11,8 @@ load_dotenv(BASE_DIR / ".env")
 RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 
+RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
+
 
 # RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 # RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
@@ -29,7 +31,11 @@ SECRET_KEY = 'django-insecure-8s#@4^i32ci0yderap&0m$=vf6t#oh=nnc)tjjrh3eo86(er^i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "unsnap-prelude-gulf.ngrok-free.dev",
+]
 
 
 # Application definition

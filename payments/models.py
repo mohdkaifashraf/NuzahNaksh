@@ -57,3 +57,18 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment for Order {self.order_id} - {self.status}"
+
+
+
+class RazorpayWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=100)
+    processed = models.BooleanField(default=False)
+    received_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "razorpay_webhook_events"
+
+    def __str__(self):
+        return f"{self.event_type} - {self.event_id}"

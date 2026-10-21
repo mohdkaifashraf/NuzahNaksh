@@ -1,44 +1,85 @@
+{% extends "base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Result | NuzahNaksh</title>
-    <link rel="stylesheet" href="{% static 'css/payment.css' %}">
-</head>
-<body>
-    <main class="payment-container">
-        {% if success %}
-            <div class="brand-mark">✓</div>
-            <section class="payment-heading">
-                <h1>Payment successful!</h1>
-                <p>Your payment has been verified and your order is confirmed.</p>
-            </section>
+{% block title %}Order Confirmed | NuzahNaksh{% endblock %}
 
-            <section class="order-details">
-                <div class="detail-row">
-                    <span class="detail-label">Order number</span>
-                    <span class="detail-value">#{{ order.id }}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Amount paid</span>
-                    <span class="detail-value">
-                        ₹{{ order.total_amount|floatformat:2 }}
-                    </span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Order status</span>
-                    <span class="detail-value">{{ order.get_status_display }}</span>
-                </div>
-            </section>
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'css/payment_result.css' %}">
+{% endblock %}
 
-            <a href="{% url 'home' %}" class="pay-button"
-               style="text-decoration:none">
-                Continue shopping →
+{% block content %}
+<main class="result-container">
+
+    {% if success %}
+        <section class="result-card">
+
+            <div class="success-icon">✓</div>
+
+            <p class="result-eyebrow">A little joy is on its way</p>
+
+            <h1>Thank you for your order!</h1>
+
+            <p class="result-message">
+                Your payment has been verified successfully.
+                We're delighted that you've chosen NuzahNaksh.
+            </p>
+
+            <div class="result-divider"></div>
+
+            <div class="result-details">
+                <div class="result-row">
+                    <span>Order number</span>
+                    <strong>#{{ order.id }}</strong>
+                </div>
+
+                <div class="result-row">
+                    <span>Amount paid</span>
+                    <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
+                </div>
+
+                <div class="result-row">
+                    <span>Order status</span>
+                    <strong class="status-confirmed">
+                        {{ order.get_status_display }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="result-note">
+                <span>✿</span>
+                <p>
+                    Your order details are saved. You can view your order
+                    history to check its status later.
+                </p>
+            </div>
+
+            <div class="result-actions">
+                <a href="{% url 'order_history' %}" class="primary-action">
+                    View My Orders →
+                </a>
+
+                <a href="{% url 'home' %}" class="secondary-action">
+                    Continue Shopping
+                </a>
+            </div>
+
+        </section>
+    {% else %}
+        <section class="result-card">
+            <div class="failure-icon">!</div>
+
+            <h1>Payment not confirmed</h1>
+
+            <p class="result-message">
+                We couldn't confirm this payment. Please check your
+                payment status before attempting another payment.
+            </p>
+
+            <a href="{% url 'home' %}" class="primary-action">
+                Return to Home
             </a>
-        {% endif %}
-    </main>
-</body>
-</html>
+        </section>
+    {% endif %}
+
+</main>
+{% endblock %}

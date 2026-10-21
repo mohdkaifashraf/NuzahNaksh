@@ -1,0 +1,173 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} | NuzahNaksh{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'css/order_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<main class="order-detail-page">
+
+    <a href="{% url 'order_history' %}" class="back-orders">
+        <span>←</span> Back to My Orders
+    </a>
+
+    <section class="detail-hero">
+        <div>
+            <span class="detail-eyebrow">YOUR ORDER DETAILS</span>
+            <h1>Order <span>#{{ order.id }}</span></h1>
+            <p>
+                Placed on {{ order.created_at|date:"d M Y" }}
+            </p>
+        </div>
+
+        <span class="detail-status status-{{ order.status|slugify }}">
+            {{ order.get_status_display }}
+        </span>
+    </section>
+
+    <div class="detail-layout">
+
+        <section class="detail-main">
+
+            <div class="detail-card">
+                <div class="detail-card-heading">
+                    <div class="detail-icon">✿</div>
+                    <div>
+                        <h2>Items in your order</h2>
+                        <p>Your selected handmade treasures.</p>
+                    </div>
+                </div>
+
+                <div class="purchased-items">
+                    {% for item in items %}
+                    <article class="purchased-item">
+
+                        <div class="item-number">
+                            {{ forloop.counter|stringformat:"02d" }}
+                        </div>
+
+                        <div class="purchased-item-info">
+                            <h3>{{ item.product_name }}</h3>
+                            <p>Quantity: {{ item.quantity }}</p>
+                            <p>
+                                Unit price:
+                                ₹{{ item.unit_price|floatformat:2 }}
+                            </p>
+                        </div>
+
+                        <div class="item-price">
+                            ₹{{ item.line_total|floatformat:2 }}
+                        </div>
+
+                    </article>
+                    {% empty %}
+                    <p>No items were found for this order.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-card-heading">
+                    <div class="detail-icon">⌂</div>
+                    <div>
+                        <h2>Delivery address</h2>
+                        <p>Address saved with your order.</p>
+                    </div>
+                </div>
+
+                <div class="delivery-address">
+                    {% for line in address_lines %}
+                        {% if line %}
+                            <p>{{ line }}</p>
+                        {% endif %}
+                    {% empty %}
+                        <p>Delivery address is not available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </section>
+
+        <aside class="detail-sidebar">
+
+            <div class="detail-card price-summary">
+                <h2>Payment summary</h2>
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ order.subtotal|floatformat:2 }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Discount</span>
+                    <span>- ₹{{ order.discount|floatformat:2 }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>₹{{ order.tax|floatformat:2 }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span>₹{{ order.shipping_charge|floatformat:2 }}</span>
+                </div>
+
+                <div class="summary-total">
+                    <span>Total</span>
+                    <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
+                </div>
+
+                <div class="payment-information">
+                    <span class="payment-dot"></span>
+                    <div>
+                        <strong>
+                            {% if payment %}
+                                {{ payment.get_status_display }}
+                            {% else %}
+                                Payment not recorded
+                            {% endif %}
+                        </strong>
+                        <p>
+                            {% if payment %}
+                                {{ payment.get_payment_method_display }}
+                            {% else %}
+                                No payment record is available.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% with latest_payment=order.payments.first %}
+                    {% if order.status == "pending" and latest_payment %}
+                        {% if latest_payment.status == "failed" %}
+                            <a href="{% url 'retry_payment' order.id %}"
+                               class="retry-payment-btn">
+                                Retry Payment
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endwith %}
+
+            </div>
+
+            <div class="detail-note">
+                <span>♡</span>
+                <p>
+                    Thank you for supporting NuzahNaksh.
+                    We hope your purchase brings you joy!
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+{% endblock %}

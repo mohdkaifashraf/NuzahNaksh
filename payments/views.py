@@ -9,7 +9,14 @@ from django.db import transaction
 from orders.models import Order, OrderItem
 from django.conf import settings
 import razorpay
-from .models import Payment
+from .models import Payment, RazorpayWebhookEvent
+from django.http import HttpResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import hashlib
+import hmac
+import json
 
 
 @login_required
@@ -25,7 +32,7 @@ def checkout(request):
 
     if not cart_items.exists():
         messages.error(request, "Your cart is empty.")
-        return redirect("cart_detail")
+        return redirect("cart")
 
     subtotal = sum(
         (item.line_total for item in cart_items),
@@ -57,7 +64,7 @@ def checkout(request):
 
                 if not cart_items:
                     messages.error(request, "Your cart is empty.")
-                    return redirect("cart_detail")
+                    return redirect("cart")
 
                 # Recalculate using the current database prices.
                 subtotal = sum(
@@ -188,6 +195,13 @@ def payment_initiate(request, order_id):
         status=Order.StatusChoice.PENDING,
     )
 
+    # Do not accept another payment if this order is already paid.
+    if order.payments.filter(
+        status=Payment.PaymentStatus.SUCCESS
+    ).exists():
+        messages.info(request, "This order has already been paid.")
+        return redirect("order_history")
+
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
         messages.error(request, "Payment gateway is not configured.")
         return redirect("checkout")
@@ -200,7 +214,6 @@ def payment_initiate(request, order_id):
     )
 
     try:
-        # Razorpay expects the amount in paise.
         amount_paise = int(order.total_amount * Decimal("100"))
 
         razorpay_order = client.order.create({
@@ -224,15 +237,17 @@ def payment_initiate(request, order_id):
         )
         return redirect("checkout")
 
-    context = {
-        "order": order,
-        "payment": payment,
-        "razorpay_key_id": settings.RAZORPAY_KEY_ID,
-        "razorpay_order_id": razorpay_order["id"],
-        "amount_paise": amount_paise,
-    }
-
-    return render(request, "payments/payment.html", context)
+    return render(
+        request,
+        "payments/payment.html",
+        {
+            "order": order,
+            "payment": payment,
+            "razorpay_key_id": settings.RAZORPAY_KEY_ID,
+            "razorpay_order_id": razorpay_order["id"],
+            "amount_paise": amount_paise,
+        },
+    )
 
 
 
@@ -369,3 +384,154 @@ def verify_payment(request):
         "payments/payment_result.html",
         {"order": order, "success": True},
     )
+
+
+@csrf_exempt
+@require_POST
+def razorpay_webhook(request):
+    webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
+
+    if not webhook_secret:
+        return HttpResponse(status=500)
+
+    # Keep the original body unchanged for signature verification.
+    raw_body = request.body
+
+    received_signature = request.headers.get(
+        "X-Razorpay-Signature", ""
+    )
+
+    expected_signature = hmac.new(
+        webhook_secret.encode("utf-8"),
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(
+        expected_signature, received_signature
+    ):
+        return HttpResponse(status=400)
+
+    # Parse JSON only after verifying the signature.
+    try:
+        payload = json.loads(raw_body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return HttpResponse(status=400)
+
+    event_id = request.headers.get("X-Razorpay-Event-Id")
+    event_type = payload.get("event", "")
+
+    if not event_id or not event_type:
+        return HttpResponse(status=400)
+
+    try:
+        with transaction.atomic():
+            event, created = RazorpayWebhookEvent.objects.get_or_create(
+                event_id=event_id,
+                defaults={"event_type": event_type},
+            )
+
+            # This event was already handled.
+            if not created and event.processed:
+                return HttpResponse(status=200)
+
+            if event_type == "payment.failed":
+                payment_entity = (
+                    payload.get("payload", {})
+                    .get("payment", {})
+                    .get("entity", {})
+                )
+
+                gateway_order_id = payment_entity.get("order_id")
+                razorpay_payment_id = payment_entity.get("id")
+
+                if not gateway_order_id or not razorpay_payment_id:
+                    return HttpResponse(status=400)
+
+                payment = (
+                    Payment.objects
+                    .select_for_update()
+                    .filter(gateway_order_id=gateway_order_id)
+                    .first()
+                )
+
+                # Don't acknowledge an unmatchable event as processed.
+                if payment is None:
+                    return HttpResponse(status=500)
+
+                # Never downgrade a successful payment.
+                if payment.status == Payment.PaymentStatus.PENDING:
+                    payment.status = Payment.PaymentStatus.FAILED
+                    payment.save(update_fields=["status", "updated_at"])
+
+            event.processed = True
+            event.processed_at = timezone.now()
+            event.save(
+                update_fields=["processed", "processed_at"]
+            )
+
+    except Exception:
+        # A non-2xx response allows Razorpay to retry.
+        return HttpResponse(status=500)
+
+    return HttpResponse(status=200)
+
+
+@login_required
+def retry_payment(request, order_id):
+    # Find an order belonging to the logged-in customer.
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        user=request.user,
+    )
+
+    # Only pending orders can be paid for.
+    if order.status != Order.StatusChoice.PENDING:
+        messages.error(
+            request,
+            "Payment cannot be retried for this order."
+        )
+        return redirect("order_history")
+
+    # Prevent retrying an order that already has a successful payment.
+    if order.payments.filter(
+        status=Payment.PaymentStatus.SUCCESS
+    ).exists():
+        messages.info(
+            request,
+            "This order has already been paid."
+        )
+        return redirect("order_history")
+
+    # Get the latest payment attempt for this order.
+    latest_payment = order.payments.order_by(
+        "-created_at", "-id"
+    ).first()
+
+    # A retry is allowed only after a failed attempt.
+    if latest_payment is None:
+        messages.error(
+            request,
+            "No previous payment attempt was found."
+        )
+        return redirect("order_history")
+
+    if latest_payment.status == Payment.PaymentStatus.PENDING:
+        messages.info(
+            request,
+            "Your previous payment is still being processed. "
+            "Please wait before retrying."
+        )
+        return redirect("order_history")
+
+    if latest_payment.status != Payment.PaymentStatus.FAILED:
+        messages.error(
+            request,
+            "This payment attempt cannot be retried."
+        )
+        return redirect("order_history")
+
+    # Create a fresh Razorpay order and Payment record
+    # using the existing payment initiation view.
+    return payment_initiate(request, order_id)
