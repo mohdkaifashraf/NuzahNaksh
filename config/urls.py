@@ -31,5 +31,5 @@ urlpatterns = [
     path('cart/', include('payments.urls')),
     path("orders/", include("orders.urls")),
     path('', include("payments.urls")),
-    # path("logout/", views.home, name = 'home')
+    path("reviews/", include("reviews.urls")),
 ]+static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -10,8 +10,8 @@ urlpatterns = [
         name="edit_address",
     ),
     path("initiate/<int:order_id>/", views.payment_initiate, name="payment_initiate"),
-        path("verify/", views.verify_payment, name="verify_payment"),
-        path("razorpay/webhook/", views.razorpay_webhook, name="razorpay_webhook"),
-        path("retry/<int:order_id>/", views.retry_payment, name="retry_payment",),
+    path("verify/", views.verify_payment, name="verify_payment"),
+    path("razorpay/webhook/", views.razorpay_webhook, name="razorpay_webhook"),
+    path("retry/<int:order_id>/", views.retry_payment, name="retry_payment",),
 
 ]

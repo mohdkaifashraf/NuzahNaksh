@@ -8,10 +8,15 @@ from django.views.decorators.http import require_POST
 
 
 @login_required
+@require_POST
 def add_item_cart(request, product_id):
 
     product = get_object_or_404(Product, pk=product_id)
-    quantity = int(request.POST.get("quantity", 1))
+    try:
+        quantity = int(request.POST.get("quantity", "1"))
+    except (TypeError, ValueError):
+        messages.error(request, "Please enter a valid quantity.")
+        return redirect("product_details", pk=product.pk)
 
     if quantity < 1 or quantity > product.stock:
         messages.error(request, "Invalid quantity or insufficient stock.")
@@ -43,9 +48,12 @@ def add_item_cart(request, product_id):
 @login_required
 def cart(request):
 
-    cart = get_object_or_404(Cart, user=request.user)
-
-    cart_items = CartItem.objects.filter(cart=cart).select_related("product")
+    cart = Cart.objects.filter(user=request.user).first()
+    cart_items = (
+        CartItem.objects.filter(cart=cart).select_related("product")
+        if cart
+        else CartItem.objects.none()
+    )
 
     subtotal = Decimal("0.00")
     for item in cart_items:
@@ -101,5 +109,4 @@ def cart_remove(request, item_id):
 
     messages.success(request, "Item removed from your cart.")
     return redirect("cart")
-
 

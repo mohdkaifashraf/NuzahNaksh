@@ -134,8 +134,8 @@
                     </div>
 
                     <!-- This is the ONLY button that submits the form -->
-                    <button type="submit" class="add-cart-button">
-                        Add to Cart
+                    <button type="submit" class="add-cart-button{% if product_in_cart %} is-added{% endif %}">
+                        {% if product_in_cart %}Added to Cart{% else %}Add to Cart{% endif %}
                     </button>
                 </form>
             {% endif %}
@@ -178,28 +178,89 @@
     <section class="detail-section reviews-section">
         <h2>Customer Reviews</h2>
 
-        {% if reviews %}
-            {% for review in reviews %}
-                <article class="review-card">
-                    <div class="review-heading">
-                        <h3>{{ review.user.username }}</h3>
-                        <span class="review-rating">
-                            ★ {{ review.rating }}/5
-                        </span>
-                    </div>
+        {% if user.is_authenticated %}
+            {% if can_review %}
+                <div class="review-form-container">
+                    <h3>Share Your Experience</h3>
+                    <p>You can review this product because it has been delivered to you.</p>
 
-                    <p>{{ review.comment|linebreaksbr }}</p>
+                    <form method="post"
+                        action="{% url 'submit_review' product.id %}"
+                        class="review-form">
+                        {% csrf_token %}
 
-                    <time>
-                        {{ review.created_at|date:"d M Y" }}
-                    </time>
-                </article>
-            {% endfor %}
+                        <label for="rating">Your Rating</label>
+                        <select name="rating" id="rating" required>
+                            <option value="">Select a rating</option>
+                            <option value="5" {% if existing_review.rating == 5 %}selected{% endif %}>★★★★★ — Excellent</option>
+                            <option value="4" {% if existing_review.rating == 4 %}selected{% endif %}>★★★★ — Very Good</option>
+                            <option value="3" {% if existing_review.rating == 3 %}selected{% endif %}>★★★ — Good</option>
+                            <option value="2" {% if existing_review.rating == 2 %}selected{% endif %}>★★ — Fair</option>
+                            <option value="1" {% if existing_review.rating == 1 %}selected{% endif %}>★ — Poor</option>
+                        </select>
+
+                        <label for="comment">Your Review</label>
+                        <textarea
+                            name="comment"
+                            id="comment"
+                            maxlength="500"
+                            rows="4"
+                            placeholder="Tell us about your experience..."
+                        >{{ existing_review.comment|default:"" }}</textarea>
+
+                        <button type="submit" class="submit-review-button">
+                            {% if existing_review %}
+                                Update Review
+                            {% else %}
+                                Submit Review
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+
+            {% elif user_has_reviewed %}
+                <p>You have already reviewed this product.</p>
+            {% else %}
+                <p class="review-eligibility-message">
+                    Reviews are available to customers after their order has been delivered.
+                </p>
+            {% endif %}
+
         {% else %}
-            <p class="empty-reviews">
-                No reviews yet. Be the first to share your experience!
+            <p>
+                <a href="{% url 'login' %}">Log in</a>
+                to review this product after delivery.
             </p>
         {% endif %}
+
+        <div class="review-list">
+            {% if reviews %}
+                {% for review in reviews %}
+                    <article class="review-card">
+                        <div class="review-heading">
+                            <h3>{{ review.user.username }}</h3>
+                            <span class="review-rating">
+                                ★ {{ review.rating }}/5
+                            </span>
+                        </div>
+
+                        <p>{{ review.comment|linebreaksbr }}</p>
+
+                        <time>
+                            {{ review.created_at|date:"d M Y" }}
+                        </time>
+
+                        {% if user.is_authenticated and review.user_id == user.id %}
+                            <span class="your-review-label">Your review</span>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p class="empty-reviews">
+                    No reviews yet. Be the first to share your experience!
+                </p>
+            {% endif %}
+        </div>
     </section>
 
     <!-- Related products -->
@@ -210,7 +271,7 @@
             <div class="related-products-grid">
                 {% for related in related_products %}
                     <article class="related-product-card">
-                        <a href="{% url 'product_detail' related.pk %}">
+                        <a href="{% url 'product_details' related.pk %}">
                             {% with related_image=related.productimage_set.first %}
                                 {% if related_image %}
                                     <img
@@ -233,6 +294,6 @@
     {% endif %}
 
 </div>
-<script src="{% static 'js/cart.js' %}"></script>
+<script src="{% static 'js/cart.js' %}?v=2"></script>
 
 {% endblock %}

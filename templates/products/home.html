@@ -10,8 +10,23 @@
 
 {% block content %}
 <section class="home-section">
-    <p class="hero-eyebrow">Explore our collection</p>
-    <h2 class="section-title">Shop by Category</h2>
+    {% if search_query %}
+        <p class="hero-eyebrow">Product search</p>
+        <h2 class="section-title">Results for “{{ search_query }}”</h2>
+    {% else %}
+        <section class="storefront-hero">
+            <div class="storefront-hero-copy">
+                <p class="hero-eyebrow">ART · FLOWERS · HANDMADE</p>
+                <h1>Thoughtful finds,<br>made to be treasured.</h1>
+                <p>Discover handmade pieces for gifting, decorating, and everyday moments.</p>
+                <a href="#collections" class="storefront-hero-cta">Browse the collection <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="storefront-hero-art" aria-hidden="true">
+                <span>✿</span>
+            </div>
+        </section>
+        <h2 class="section-title">Shop by Category</h2>
+    {% endif %}
 
     {% if messages %}
         <div class="wishlist-messages" role="status">
@@ -21,125 +36,134 @@
         </div>
     {% endif %}
 
+    {% if search_query and not categories %}
+        <p class="wishlist-empty" role="status">
+            No products matched “{{ search_query }}”. Try another name or keyword.
+        </p>
+    {% endif %}
+
     {% for category in categories %}
-        <section class="category-container">
+        <section class="category-container"{% if forloop.first %} id="collections"{% endif %}>
             <h2 class="category-heading">
                 {{ category.category_name }}
             </h2>
 
             <div class="product-grid">
-                {% for product in category.product_set.all %}
-                    {% if product.stock > 0 %}
-                        <article class="product-card">
+                {% for product in category.display_products %}
+                    <article class="product-card">
 
-                            <a class="product-card-link"
+                        <a class="product-card-link"
                             href="{% url 'product_details' product.pk %}">
 
-                                <div class="product-image-wrapper">
-                                    {% with product_image=product.productimage_set.first %}
-                                        {% if product_image %}
-                                            <img
-                                                src="{{ product_image.image.url }}"
-                                                alt="{{ product.product_name }}"
-                                                class="product-image"
-                                            >
-                                        {% else %}
-                                            <div class="product-image-placeholder">
-                                                Image coming soon
-                                            </div>
-                                        {% endif %}
-                                    {% endwith %}
+                            <div class="product-image-wrapper">
+                                {% with product_image=product.productimage_set.first %}
+                                    {% if product_image %}
+                                        <img
+                                            src="{{ product_image.image.url }}"
+                                            alt="{{ product.product_name }}"
+                                            class="product-image"
+                                        >
+                                    {% else %}
+                                        <div class="product-image-placeholder">
+                                            Image coming soon
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="discount-badge">
+                                        {{ product.discount_percentage }}% OFF
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="product-card-body">
+                                <h3>{{ product.product_name }}</h3>
+
+                                <p class="product-description">
+                                    {{ product.product_description|truncatewords:15 }}
+                                </p>
+
+                                <div class="product-pricing">
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original-price">
+                                            ₹{{ product.price }}
+                                        </span>
+                                    {% endif %}
+
+                                    <span class="selling-price">
+                                        ₹{{ product.discounted_price }}
+                                    </span>
 
                                     {% if product.discount_percentage > 0 %}
-                                        <span class="discount-badge">
-                                            {{ product.discount_percentage }}% OFF
+                                        <span class="savings">
+                                            Save ₹{{ product.discount_amount }}
                                         </span>
                                     {% endif %}
                                 </div>
+                                {% if product.stock == 0 %}
+                                    <p class="product-stock">Out of stock</p>
+                                {% endif %}
+                            </div>
+                        </a>
 
-                                <div class="product-card-body">
-                                    <h3>{{ product.product_name }}</h3>
-
-                                    <p class="product-description">
-                                        {{ product.product_description|truncatewords:15 }}
-                                    </p>
-                                    
-                                    <div class="product-pricing">
-                                        {% if product.discount_percentage > 0 %}
-                                            <span class="original-price">
-                                                ₹{{ product.price }}
-                                            </span>
-                                        {% endif %}
-
-                                        <span class="selling-price">
-                                            ₹{{ product.discounted_price }}
-                                        </span>
-
-                                        {% if product.discount_percentage > 0 %}
-                                            <span class="savings">
-                                                Save ₹{{ product.discount_amount }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </a>
-
-                            {% if user.is_authenticated %}
-                                <form method="post"
-                                      action="{% url 'toggle_wishlist' product.pk %}"
-                                      class="wishlist-toggle-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                    {% if product.pk in wishlisted_product_ids %}
-                                        <button type="submit"
-                                                class="wishlist-heart is-wishlisted"
-                                                aria-label="Remove {{ product.product_name }} from wishlist"
-                                                aria-pressed="true">♥</button>
-                                    {% else %}
-                                        <button type="submit"
-                                                class="wishlist-heart"
-                                                aria-label="Add {{ product.product_name }} to wishlist"
-                                                aria-pressed="false">♡</button>
-                                    {% endif %}
-                                </form>
-                            {% else %}
-                                <a class="wishlist-heart"
-                                   href="{% url 'login' %}?next={% url 'home' %}"
-                                   aria-label="Sign in to add {{ product.product_name }} to wishlist">♡</a>
-                            {% endif %}
-
-                            {% comment %} <form method="post"
-                                action="#"
-                                class="add-to-cart-form">
+                        {% if user.is_authenticated %}
+                            <form method="post"
+                                  action="{% url 'toggle_wishlist' product.pk %}"
+                                  class="wishlist-toggle-form">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                {% if product.pk in wishlisted_product_ids %}
+                                    <button type="submit"
+                                            class="wishlist-heart is-wishlisted"
+                                            aria-label="Remove {{ product.product_name }} from wishlist"
+                                            aria-pressed="true">♥</button>
+                                {% else %}
+                                    <button type="submit"
+                                            class="wishlist-heart"
+                                            aria-label="Add {{ product.product_name }} to wishlist"
+                                            aria-pressed="false">♡</button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            <a class="wishlist-heart"
+                               href="{% url 'login' %}?next={% url 'home' %}"
+                               aria-label="Sign in to add {{ product.product_name }} to wishlist">♡</a>
+                        {% endif %}
 
-                                <label for="quantity-{{ product.pk }}">
-                                    Quantity
-                                </label>
+                        {% comment %} <form method="post"
+                            action="#"
+                            class="add-to-cart-form">
+                            {% csrf_token %}
 
-                                <input
-                                    type="number"
-                                    id="quantity-{{ product.pk }}"
-                                    name="quantity"
-                                    value="1"
-                                    min="1"
-                                    max="{{ product.stock }}"
-                                    required
-                                >
+                            <label for="quantity-{{ product.pk }}">
+                                Quantity
+                            </label>
 
-                                <button type="submit" class="add-to-cart-button">
-                                    Add to Cart
-                                </button>
-                            </form> {% endcomment %}
+                            <input
+                                type="number"
+                                id="quantity-{{ product.pk }}"
+                                name="quantity"
+                                value="1"
+                                min="1"
+                                max="{{ product.stock }}"
+                                required
+                            >
 
-                        </article>
-                    {% endif %}
+                            <button type="submit" class="add-to-cart-button">
+                                Add to Cart
+                            </button>
+                        </form> {% endcomment %}
+
+                    </article>
                 {% empty %}
-                    <p>No products are available in this category yet.</p>
+                    {% if not search_query %}
+                        <p>No products are available in this category yet.</p>
+                    {% endif %}
                 {% endfor %}
             </div>
         </section>
-{% endfor %}
+    {% endfor %}
 
     {% comment %} {% empty %}
         <p>No categories available yet.</p>

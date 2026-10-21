@@ -7,6 +7,7 @@ from accounts.models import Address
 from django.contrib import messages
 from django.db import transaction
 from orders.models import Order, OrderItem
+from products.models import Product
 from django.conf import settings
 import razorpay
 from .models import Payment, RazorpayWebhookEvent
@@ -164,7 +165,7 @@ def address(request):
     return render(request, 'payments/address.html', context)
 
 
-
+@login_required
 def edit_address(request, address_id):
     address = get_object_or_404(Address, id=address_id, User=request.user)
 
@@ -195,13 +196,6 @@ def payment_initiate(request, order_id):
         status=Order.StatusChoice.PENDING,
     )
 
-    # Do not accept another payment if this order is already paid.
-    if order.payments.filter(
-        status=Payment.PaymentStatus.SUCCESS
-    ).exists():
-        messages.info(request, "This order has already been paid.")
-        return redirect("order_history")
-
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
         messages.error(request, "Payment gateway is not configured.")
         return redirect("checkout")
@@ -215,20 +209,46 @@ def payment_initiate(request, order_id):
 
     try:
         amount_paise = int(order.total_amount * Decimal("100"))
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(
+                pk=order.pk,
+                user=request.user,
+                status=Order.StatusChoice.PENDING,
+            )
 
-        razorpay_order = client.order.create({
-            "amount": amount_paise,
-            "currency": "INR",
-            "receipt": f"order_{order.id}",
-        })
+            if order.payments.filter(
+                status=Payment.PaymentStatus.SUCCESS
+            ).exists():
+                messages.info(request, "This order has already been paid.")
+                return redirect("order_history")
 
-        payment = Payment.objects.create(
-            order=order,
-            amount=order.total_amount,
-            payment_method=Payment.PaymentMethod.RAZORPAY,
-            status=Payment.PaymentStatus.PENDING,
-            gateway_order_id=razorpay_order["id"],
-        )
+            payment = order.payments.filter(
+                status=Payment.PaymentStatus.PENDING
+            ).order_by("-created_at", "-id").first()
+
+            if payment is None:
+                payment = Payment.objects.create(
+                    order=order,
+                    amount=order.total_amount,
+                    payment_method=Payment.PaymentMethod.RAZORPAY,
+                    status=Payment.PaymentStatus.PENDING,
+                )
+
+            if not payment.gateway_order_id:
+                razorpay_order = client.order.create({
+                    "amount": amount_paise,
+                    "currency": "INR",
+                    "receipt": f"order_{order.id}",
+                })
+                payment.gateway_order_id = razorpay_order["id"]
+                payment.amount = order.total_amount
+                payment.save(update_fields=[
+                    "gateway_order_id",
+                    "amount",
+                    "updated_at",
+                ])
+
+        razorpay_order_id = payment.gateway_order_id
 
     except Exception:
         messages.error(
@@ -244,7 +264,7 @@ def payment_initiate(request, order_id):
             "order": order,
             "payment": payment,
             "razorpay_key_id": settings.RAZORPAY_KEY_ID,
-            "razorpay_order_id": razorpay_order["id"],
+            "razorpay_order_id": razorpay_order_id,
             "amount_paise": amount_paise,
         },
     )
@@ -362,6 +382,38 @@ def verify_payment(request):
 
         # Recheck after acquiring locks to handle duplicate submissions.
         if payment.status != Payment.PaymentStatus.SUCCESS:
+            order_items = list(
+                order.items.select_related("product").order_by("product_id")
+            )
+            quantities_by_product = {}
+            for item in order_items:
+                quantities_by_product[item.product_id] = (
+                    quantities_by_product.get(item.product_id, 0)
+                    + item.quantity
+                )
+
+            products = {
+                product.pk: product
+                for product in Product.objects.select_for_update()
+                .filter(pk__in=quantities_by_product)
+                .order_by("pk")
+            }
+
+            for product_id, quantity in quantities_by_product.items():
+                product = products[product_id]
+                if product.stock < quantity:
+                    messages.error(
+                        request,
+                        "Payment was received, but inventory changed before "
+                        "the order could be confirmed. Please contact support.",
+                    )
+                    return redirect("order_history")
+
+            for product_id, quantity in quantities_by_product.items():
+                product = products[product_id]
+                product.stock -= quantity
+                product.save(update_fields=["stock", "updated_at"])
+
             payment.transaction_id = razorpay_payment_id
             payment.status = Payment.PaymentStatus.SUCCESS
             payment.save(update_fields=[

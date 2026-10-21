@@ -9,6 +9,7 @@
     <title>{% block title %}NuzahNaksh{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block page_styles %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/storefront_theme.css' %}?v=7">
 </head>
 <body>
     <header class="site-header">
@@ -22,12 +23,13 @@
                 </span>
             </a>
 
-            <form class="header-search" method="GET" action="/">
+            <form class="header-search" method="GET" action="{% url 'home' %}">
                 <input
                     type="search"
                     name="q"
                     placeholder="Search handmade treasures..."
                     aria-label="Search products"
+                    value="{{ search_query }}"
                 >
                 <button type="submit" aria-label="Search">⌕</button>
             </form>
@@ -72,5 +74,6 @@
     <main class="page-shell">
         {% block content %}{% endblock %}
     </main>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
