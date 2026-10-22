@@ -1,0 +1,377 @@
+/* ==================================
+   NuzahNaksh — Order History
+   Floral craft design
+   ================================== */
+
+.order-history-page {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 35px 24px 75px;
+    color: #302927;
+}
+
+/* Hero */
+
+.orders-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 205px;
+    padding: 42px 48px;
+    overflow: hidden;
+    border: 1px solid #f0dfd8;
+    border-radius: 25px;
+    background:
+        radial-gradient(circle at 85% 25%, #f5dfdc 0, transparent 28%),
+        linear-gradient(120deg, #fff8f3, #f9eeea);
+}
+
+.orders-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.orders-eyebrow {
+    color: #a95460;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.orders-hero h1 {
+    margin: 13px 0 10px;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(32px, 5vw, 45px);
+    font-weight: 600;
+}
+
+.orders-hero h1 span {
+    color: #b86670;
+    font-size: 30px;
+}
+
+.orders-hero p {
+    margin: 0;
+    color: #817671;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.orders-flower {
+    flex-shrink: 0;
+    color: #d7a2a2;
+    font-size: 110px;
+    opacity: 0.65;
+    transform: rotate(-15deg);
+}
+
+/* Section heading */
+
+.orders-section {
+    margin-top: 42px;
+}
+
+.orders-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.orders-section-heading h2 {
+    margin: 0 0 7px;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.orders-section-heading p {
+    margin: 0;
+    color: #817671;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.continue-shopping {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #984b56;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.continue-shopping:hover {
+    color: #773843;
+}
+
+/* Order cards */
+
+.orders-list {
+    display: grid;
+    gap: 20px;
+}
+
+.order-card {
+    padding: 25px 28px;
+    border: 1px solid #eee2dc;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(91, 57, 48, 0.045);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+    border-color: #e7c7c7;
+    box-shadow: 0 12px 35px rgba(91, 57, 48, 0.075);
+}
+
+.order-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1e9e5;
+}
+
+.order-label,
+.info-label {
+    display: block;
+    color: #93847e;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+}
+
+.order-reference h3 {
+    margin: 7px 0 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Status badges */
+
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 13px;
+    border-radius: 30px;
+    background: #f5f0ec;
+    color: #71635d;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.status-confirmed,
+.status-delivered,
+.status-order-confirmed {
+    color: #416e4d;
+    background: #e8f4e9;
+}
+
+.status-pending {
+    color: #92691f;
+    background: #fff3d8;
+}
+
+.status-shipped {
+    color: #426b9a;
+    background: #eaf2ff;
+}
+
+.status-cancelled {
+    color: #a34848;
+    background: #fbeaea;
+}
+
+/* Order information */
+
+.order-card-body {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    padding: 24px 0;
+}
+
+.order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.info-label {
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    color: #302927;
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.order-amount {
+    color: #984b56;
+    font-size: 17px;
+}
+
+/* Card footer */
+
+.order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #f1e9e5;
+}
+
+.order-card-footer p {
+    margin: 0;
+    color: #817671;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.order-flower {
+    margin-right: 5px;
+    color: #b86670;
+}
+
+.view-order-btn,
+.shop-now-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 43px;
+    padding: 12px 17px;
+    border-radius: 11px;
+    background: #a95460;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.view-order-btn:hover,
+.shop-now-btn:hover {
+    background: #8f414c;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Empty state */
+
+.empty-orders {
+    padding: 60px 24px;
+    border: 1px dashed #e7d3cc;
+    border-radius: 22px;
+    background: #fffdfb;
+    text-align: center;
+}
+
+.empty-orders-icon {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f9e9e9;
+    color: #b86670;
+    font-size: 38px;
+}
+
+.empty-orders h2 {
+    margin: 0 0 12px;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 28px;
+}
+
+.empty-orders p {
+    max-width: 430px;
+    margin: 0 auto 25px;
+    color: #817671;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+    .order-history-page {
+        padding: 22px 14px 45px;
+    }
+
+    .orders-hero {
+        min-height: 175px;
+        padding: 30px 24px;
+        border-radius: 20px;
+    }
+
+    .orders-flower {
+        margin-right: -20px;
+        font-size: 70px;
+    }
+
+    .orders-section {
+        margin-top: 32px;
+    }
+
+    .orders-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .order-card {
+        padding: 21px 18px;
+    }
+
+    .order-card-body {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 12px;
+    }
+
+    .order-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .view-order-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .orders-hero {
+        padding: 25px 18px;
+    }
+
+    .orders-flower {
+        display: none;
+    }
+
+    .order-status {
+        max-width: 125px;
+        padding: 7px 9px;
+        font-size: 10px;
+    }
+
+    .order-card-body {
+        gap: 20px 8px;
+    }
+}

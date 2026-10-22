@@ -1,0 +1,410 @@
+/* ==================================
+   NuzahNaksh — Order Detail
+   ================================== */
+
+.order-detail-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 35px 24px 70px;
+    color: #302927;
+}
+
+.back-orders {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 25px;
+    color: #984b56;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.back-orders:hover {
+    color: #773843;
+}
+
+.back-orders span {
+    font-size: 19px;
+}
+
+/* Hero */
+
+.detail-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 32px 38px;
+    border: 1px solid #f0dfd8;
+    border-radius: 23px;
+    background:
+        radial-gradient(circle at 90% 15%, #f5dfdc 0, transparent 28%),
+        linear-gradient(120deg, #fff8f3, #f9eeea);
+}
+
+.detail-eyebrow {
+    color: #a95460;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+.detail-hero h1 {
+    margin: 11px 0 7px;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(29px, 5vw, 40px);
+}
+
+.detail-hero h1 span {
+    color: #a95460;
+}
+
+.detail-hero p {
+    margin: 0;
+    color: #817671;
+    font-size: 13px;
+}
+
+/* Status */
+
+.detail-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 15px;
+    border-radius: 30px;
+    background: #f5f0ec;
+    color: #71635d;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.status-confirmed,
+.status-delivered,
+.status-order-confirmed {
+    color: #416e4d;
+    background: #e8f4e9;
+}
+
+.status-pending {
+    color: #92691f;
+    background: #fff3d8;
+}
+
+.status-shipped {
+    color: #426b9a;
+    background: #eaf2ff;
+}
+
+.status-cancelled {
+    color: #a34848;
+    background: #fbeaea;
+}
+
+/* Main layout */
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+    align-items: start;
+    gap: 25px;
+    margin-top: 28px;
+}
+
+.detail-main,
+.detail-sidebar {
+    display: grid;
+    gap: 22px;
+    min-width: 0;
+}
+
+.detail-card {
+    padding: 25px;
+    border: 1px solid #eee2dc;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(91, 57, 48, 0.04);
+}
+
+/* Card heading */
+
+.detail-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 21px;
+    border-bottom: 1px solid #f1e9e5;
+}
+
+.detail-icon {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #f9e9e9;
+    color: #a95460;
+    font-size: 23px;
+}
+
+.detail-card-heading h2,
+.price-summary h2 {
+    margin: 0 0 6px;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.detail-card-heading p {
+    margin: 0;
+    color: #817671;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Purchased items */
+
+.purchased-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 22px 0;
+}
+
+.purchased-item + .purchased-item {
+    border-top: 1px solid #f1e9e5;
+}
+
+.item-number {
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #fff6f1;
+    color: #a95460;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.purchased-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.purchased-item-info h3 {
+    margin: 0 0 7px;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.purchased-item-info p {
+    margin: 4px 0 0;
+    color: #817671;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.item-price {
+    flex-shrink: 0;
+    color: #984b56;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Delivery address */
+
+.delivery-address {
+    padding-top: 18px;
+}
+
+.delivery-address p {
+    margin: 0 0 7px;
+    color: #71635d;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.delivery-address p:first-child {
+    color: #302927;
+    font-weight: 700;
+}
+
+/* Payment summary */
+
+.price-summary h2 {
+    margin-bottom: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 0;
+    color: #817671;
+    font-size: 13px;
+}
+
+.summary-row span:last-child {
+    color: #302927;
+    font-weight: 600;
+    text-align: right;
+}
+
+.summary-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 8px;
+    padding-top: 20px;
+    border-top: 1px solid #eee2dc;
+}
+
+.summary-total span {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.summary-total strong {
+    color: #984b56;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 24px;
+    overflow-wrap: anywhere;
+}
+
+/* Payment status */
+
+.payment-information {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-top: 22px;
+    padding: 15px;
+    border-radius: 13px;
+    background: #fff7f3;
+}
+
+.payment-dot {
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: #b86670;
+}
+
+.payment-information strong {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.payment-information p {
+    margin: 5px 0 0;
+    color: #817671;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* Decorative note */
+
+.detail-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid #f0dfd8;
+    border-radius: 17px;
+    background: linear-gradient(120deg, #fff8f3, #f9eeea);
+}
+
+.detail-note span {
+    color: #b86670;
+    font-size: 23px;
+}
+
+.detail-note p {
+    margin: 0;
+    color: #71635d;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* Responsive */
+
+@media (max-width: 850px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-sidebar {
+        grid-row: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .order-detail-page {
+        padding: 22px 14px 45px;
+    }
+
+    .detail-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 26px 22px;
+        border-radius: 19px;
+    }
+
+    .detail-card {
+        padding: 20px 17px;
+        border-radius: 17px;
+    }
+
+    .detail-card-heading h2,
+    .price-summary h2 {
+        font-size: 19px;
+    }
+
+    .purchased-item {
+        gap: 11px;
+    }
+
+    .item-number {
+        width: 36px;
+        height: 36px;
+    }
+
+    .item-price {
+        font-size: 13px;
+    }
+}
+
+
+.retry-payment-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 20px;
+    padding: 14px 20px;
+    background: #8b5e3c;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.retry-payment-btn:hover {
+    background: #6f482d;
+    color: #fff;
+}
+
+

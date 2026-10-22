@@ -237,7 +237,7 @@ textarea {
 .home-section {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 40px 4.5% 70px;
+    padding: 24px 4.5% 48px;
     background: transparent;
 }
 
@@ -261,12 +261,12 @@ textarea {
 .storefront-hero {
     position: relative;
     display: flex;
-    min-height: 300px;
+    min-height: 150px;
     align-items: center;
     justify-content: space-between;
-    gap: 28px;
-    margin: 6px 0 38px;
-    padding: clamp(30px, 5vw, 62px);
+    gap: 16px;
+    margin: 0 0 18px;
+    padding: 14px 24px;
     overflow: hidden;
     border: 1px solid #e2e7de;
     border-radius: 10px;
@@ -282,7 +282,7 @@ textarea {
 }
 
 .storefront-hero .hero-eyebrow {
-    margin: 0 0 12px;
+    margin: 0 0 4px;
     color: var(--store-green);
     text-align: left;
 }
@@ -290,30 +290,30 @@ textarea {
 .storefront-hero h1 {
     margin: 0;
     color: var(--store-ink);
-    font-size: clamp(32px, 4.2vw, 52px);
+    font-size: clamp(25px, 2.5vw, 32px);
     font-weight: 750;
     letter-spacing: -0.045em;
-    line-height: 1.12;
+    line-height: 1.04;
 }
 
 .storefront-hero-copy > p:not(.hero-eyebrow) {
     max-width: 470px;
-    margin: 15px 0 22px;
+    margin: 6px 0 9px;
     color: var(--store-muted);
-    font-size: 15px;
+    font-size: 12px;
 }
 
 .storefront-hero-cta {
     display: inline-flex;
-    min-height: 44px;
+    min-height: 34px;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 10px 17px;
+    gap: 8px;
+    padding: 7px 12px;
     border-radius: 6px;
     background: var(--store-green);
     color: #fff;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     text-decoration: none;
 }
@@ -325,7 +325,7 @@ textarea {
 
 .storefront-hero-art {
     display: grid;
-    width: clamp(130px, 19vw, 240px);
+    width: clamp(86px, 9vw, 112px);
     aspect-ratio: 1;
     flex: 0 0 auto;
     place-items: center;
@@ -336,7 +336,7 @@ textarea {
 }
 
 .storefront-hero-art span {
-    font-size: clamp(80px, 12vw, 150px);
+    font-size: clamp(58px, 7vw, 78px);
     line-height: 1;
 }
 
@@ -519,64 +519,51 @@ textarea {
 }
 
 .product-gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
-    align-content: start;
+    align-items: flex-start;
 }
 
 .product-detail-page .product-gallery .gallery-image,
 .product-detail-page .product-gallery .no-product-image {
-    grid-column: auto;
-    width: 100%;
-    height: auto;
+    position: relative;
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
     min-height: 0;
-    aspect-ratio: 1 / 1;
+    height: auto;
+    overflow: hidden;
     border-radius: 10px;
     background: #efefe9;
 }
 
 .product-detail-page .product-gallery .gallery-image:first-child {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: fit-content;
-    height: fit-content;
-    max-width: 100%;
-    aspect-ratio: auto;
-}
-
-.product-detail-page .product-gallery .gallery-image:not(:first-child) {
-    justify-self: center;
-    width: fit-content;
-    height: fit-content;
-    max-width: 100%;
-    aspect-ratio: auto;
+    flex-basis: 100%;
 }
 
 .product-detail-page .product-gallery .gallery-image:only-child,
 .product-detail-page .product-gallery .no-product-image:only-child {
-    grid-column: 1 / -1;
-    aspect-ratio: 1.45 / 1;
+    flex-basis: 100%;
+}
+
+.product-detail-page .product-gallery .no-product-image {
+    display: grid;
+    min-height: 240px;
+    place-items: center;
 }
 
 .product-detail-page .product-gallery .gallery-image img {
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
     min-height: 0;
     max-width: 100%;
-    max-height: 390px;
+    max-height: none;
     object-fit: contain;
 }
 
 .product-detail-page .product-gallery .gallery-image:first-child img {
-    width: auto;
-    height: auto;
-    max-height: 390px;
     background: #efefe9;
-}
-
-.product-detail-page .product-gallery .gallery-image:not(:first-child) img {
-    max-height: 130px;
 }
 
 .primary-image-label {
@@ -1243,18 +1230,18 @@ textarea {
     }
 
     .storefront-hero {
-        min-height: 250px;
-        margin-bottom: 30px;
-        padding: 30px 24px;
+        min-height: 140px;
+        margin-bottom: 16px;
+        padding: 14px 18px;
     }
 
     .storefront-hero-art {
-        width: 125px;
-        margin-right: -38px;
+        width: 96px;
+        margin-right: -28px;
     }
 
     .storefront-hero-art span {
-        font-size: 82px;
+        font-size: 64px;
     }
 
     .category-container {
@@ -1304,15 +1291,6 @@ textarea {
         padding: 25px 0 50px;
     }
 
-    .product-detail-page .product-gallery .gallery-image img,
-    .product-detail-page .product-gallery .gallery-image:first-child img {
-        max-height: 320px;
-    }
-
-    .product-detail-page .product-gallery .gallery-image:not(:first-child) img {
-        max-height: 110px;
-    }
-
     .product-main {
         grid-template-columns: minmax(0, 1fr);
         gap: 24px;
@@ -1334,24 +1312,25 @@ textarea {
 
 @media (max-width: 480px) {
     .storefront-hero {
-        min-height: 225px;
-        padding: 25px 20px;
+        min-height: 132px;
+        padding: 12px 14px;
     }
 
     .storefront-hero h1 {
-        font-size: 30px;
+        font-size: 23px;
     }
 
     .storefront-hero-copy > p:not(.hero-eyebrow) {
-        max-width: 260px;
-        font-size: 13px;
+        max-width: 215px;
+        margin: 5px 0 8px;
+        font-size: 11px;
     }
 
     .storefront-hero-art {
         position: absolute;
-        right: -42px;
-        bottom: -28px;
-        width: 135px;
+        right: -48px;
+        bottom: -42px;
+        width: 105px;
         opacity: 0.5;
     }
 
